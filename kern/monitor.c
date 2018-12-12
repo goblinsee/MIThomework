@@ -70,9 +70,11 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 			args[i] = *((unsigned int*)(ebp + 8 + 4 * i));
 		cprintf(" ebp %08x eip %08x args %08x %08x %08x %08x %08x\n",
 		ebp, eip, args[0], args[1], args[2], args[3], args[4]);
-		if (args[4] > 12291)
-			cprintf("kern/init.c:39: test_backtrace+\n");
-		else cprintf("kern/init.c:23: i386_init+\n");
+		
+		struct Eipdebuginfo info;
+		debuginfo_eip(eip, &info);
+		cprintf("%s:%d: %.*s+%d\n", info.eip_file
+		,info.eip_line,info.eip_fn_namelen,info.eip_fn_name,eip-info.eip_fn_addr);
 		ebp = *((unsigned int*)ebp);
 	} while (ebp != 0);
 	return 0;
